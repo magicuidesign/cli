@@ -38,8 +38,6 @@ export const clientPaths: Record<string, string> = {
     "cline_mcp_settings.json",
   ),
   windsurf: path.join(homeDir, ".codeium", "windsurf", "mcp_config.json"),
-  witsy: path.join(baseDir, "Witsy", "settings.json"),
-  enconvo: path.join(homeDir, ".config", "enconvo", "mcp_config.json"),
   cursor: path.join(homeDir, ".cursor", "mcp.json"),
 };
 

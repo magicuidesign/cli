@@ -3,8 +3,6 @@ export type ValidClient =
   | "cline"
   | "roo-cline"
   | "windsurf"
-  | "witsy"
-  | "enconvo"
   | "cursor";
 
 export const VALID_CLIENTS: ValidClient[] = [
@@ -12,8 +10,6 @@ export const VALID_CLIENTS: ValidClient[] = [
   "cline",
   "roo-cline",
   "windsurf",
-  "witsy",
-  "enconvo",
   "cursor",
 ];
 
