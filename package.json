@@ -1,0 +1,50 @@
+{
+  "name": "@magicuidesign/cli",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Official CLI for Magic UI",
+  "main": "dist/index.js",
+  "homepage": "https://magicui.design",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:magicuidesign/cli.git"
+  },
+  "files": [
+    "dist"
+  ],
+  "bin": {
+    "magicui-cli": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc && shx chmod +x dist/cli.js",
+    "start": "node dist/cli.js",
+    "dev": "nodemon --watch src --ext ts,json --exec \"npm run build\"",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "magicuidesign",
+    "magicui",
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "cli"
+  ],
+  "author": "hello@dillion.io",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.0.0",
+    "inquirer": "^12.5.0",
+    "ora": "^8.0.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.28",
+    "nodemon": "^3.1.0",
+    "shx": "^0.3.4",
+    "typescript": "^5.4.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
