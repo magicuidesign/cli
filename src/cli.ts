@@ -8,7 +8,7 @@ import { VALID_CLIENTS } from "./types.js";
 const program = new Command();
 
 program
-  .name("magicui")
+  .name("@magicuidesign/cli")
   .description("Install Magic UI Components or MCP configuration")
   .version("1.0.0");
 

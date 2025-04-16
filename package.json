@@ -18,8 +18,7 @@
   "scripts": {
     "build": "tsc && shx chmod +x dist/cli.js",
     "start": "node dist/cli.js",
-    "dev": "nodemon --watch src --ext ts,json --exec \"npm run build\"",
-    "prepare": "npm run build"
+    "dev": "nodemon --watch src --ext ts,json --exec \"npm run build\""
   },
   "keywords": [
     "magicuidesign",
