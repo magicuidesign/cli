@@ -28,7 +28,7 @@
     "ai",
     "cli"
   ],
-  "author": "hello@dillion.io",
+  "author": "Dillion Verma <hello@dillion.io>",
   "license": "ISC",
   "dependencies": {
     "chalk": "^5.3.0",
