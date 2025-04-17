@@ -1,6 +1,6 @@
 {
   "name": "@magicuidesign/cli",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "description": "Official CLI for Magic UI",
   "main": "dist/index.js",
