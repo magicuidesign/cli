@@ -39,6 +39,12 @@ export const clientPaths: Record<string, string> = {
   ),
   windsurf: path.join(homeDir, ".codeium", "windsurf", "mcp_config.json"),
   cursor: path.join(homeDir, ".cursor", "mcp.json"),
+  vscode: path.join(
+    baseDir,
+    vscodePath,
+    "..",
+    "settings.json",
+  ),
 };
 
 export const createPlatformCommand = (passedArgs: string[]) => {
@@ -54,13 +60,21 @@ export const createPlatformCommand = (passedArgs: string[]) => {
   };
 };
 
-export const getDefaultConfig = () => {
+export const getDefaultConfig = (client?: string) => {
   const args = ["-y", "@magicuidesign/mcp@latest"];
   const command = createPlatformCommand(args);
 
-  return {
-    mcpServers: {
-      "@magicuidesign/mcp": command,
-    },
-  };
+  return client === "vscode"
+    ? {
+        mcp: {
+          servers: {
+            "@magicuidesign/mcp": command,
+          },
+        },
+      }
+    : {
+        mcpServers: {
+          "@magicuidesign/mcp": command,
+        },
+      };
 };

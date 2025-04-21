@@ -13,7 +13,7 @@ export async function install(client: ValidClient): Promise<void> {
   ).start();
 
   try {
-    const config = { ...getDefaultConfig() };
+    const config = getDefaultConfig(client);
 
     writeConfig(client, config);
     spinner.succeed(

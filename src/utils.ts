@@ -15,17 +15,24 @@ export function readConfig(client: ValidClient): ClientConfig {
   const configPath = getConfigPath(client);
 
   if (!fs.existsSync(configPath)) {
-    return { mcpServers: {} };
+    return client === "vscode" ? { mcp: { servers: {} } } : { mcpServers: {} };
   }
 
   try {
     const rawConfig = JSON.parse(fs.readFileSync(configPath, "utf8"));
+    if (client === "vscode") {
+      return {
+        mcp: {
+          servers: (rawConfig.mcp && rawConfig.mcp.servers) || {},
+        },
+      };
+    }
     return {
       ...rawConfig,
       mcpServers: rawConfig.mcpServers || {},
     };
   } catch (error) {
-    return { mcpServers: {} };
+    return client === "vscode" ? { mcp: { servers: {} } } : { mcpServers: {} };
   }
 }
 
@@ -37,11 +44,19 @@ export function writeConfig(client: ValidClient, config: ClientConfig): void {
     fs.mkdirSync(configDir, { recursive: true });
   }
 
-  if (!config.mcpServers || typeof config.mcpServers !== "object") {
+  // Validate config structure
+  if (client === "vscode") {
+    if (!config.mcp?.servers || typeof config.mcp.servers !== "object") {
+      throw new Error("Invalid mcp.servers structure for vscode");
+    }
+  } else if (!config.mcpServers || typeof config.mcpServers !== "object") {
     throw new Error("Invalid mcpServers structure");
   }
 
-  let existingConfig: ClientConfig = { mcpServers: {} };
+  let existingConfig: ClientConfig = client === "vscode" 
+    ? { mcp: { servers: {} } }
+    : { mcpServers: {} };
+
   try {
     if (fs.existsSync(configPath)) {
       existingConfig = JSON.parse(fs.readFileSync(configPath, "utf8"));
@@ -50,13 +65,27 @@ export function writeConfig(client: ValidClient, config: ClientConfig): void {
     // If reading fails, continue with empty existing config
   }
 
-  const mergedConfig = {
-    ...existingConfig,
-    mcpServers: {
-      ...existingConfig.mcpServers,
-      ...config.mcpServers,
-    },
-  };
+  let mergedConfig;
+  if (client === "vscode" && config.mcp?.servers) {
+    mergedConfig = {
+      ...existingConfig,
+      mcp: {
+        ...existingConfig.mcp,
+        servers: {
+          ...(existingConfig.mcp?.servers || {}),
+          ...config.mcp.servers,
+        },
+      },
+    };
+  } else if (config.mcpServers) {
+    mergedConfig = {
+      ...existingConfig,
+      mcpServers: {
+        ...existingConfig.mcpServers,
+        ...config.mcpServers,
+      },
+    };
+  }
 
   fs.writeFileSync(configPath, JSON.stringify(mergedConfig, null, 2));
 }
