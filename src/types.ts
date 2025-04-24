@@ -21,10 +21,7 @@ export interface ServerConfig {
 }
 
 export interface ClientConfig {
-  mcpServers?: Record<string, ServerConfig>;
-  mcp?: {
-    servers: Record<string, ServerConfig>;
-  };
+  mcpServers: Record<string, ServerConfig>;
 }
 
 export interface InstallOptions {

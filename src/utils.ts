@@ -15,24 +15,23 @@ export function readConfig(client: ValidClient): ClientConfig {
   const configPath = getConfigPath(client);
 
   if (!fs.existsSync(configPath)) {
-    return client === "vscode" ? { mcp: { servers: {} } } : { mcpServers: {} };
+    return { mcpServers: {} };
   }
 
   try {
     const rawConfig = JSON.parse(fs.readFileSync(configPath, "utf8"));
-    if (client === "vscode") {
+    // Convert VS Code format to internal format if needed
+    if (client === "vscode" && rawConfig.mcp?.servers) {
       return {
-        mcp: {
-          servers: (rawConfig.mcp && rawConfig.mcp.servers) || {},
-        },
+        mcpServers: rawConfig.mcp.servers
       };
     }
+    // For all other clients or if VS Code config is already in mcpServers format
     return {
-      ...rawConfig,
-      mcpServers: rawConfig.mcpServers || {},
+      mcpServers: rawConfig.mcpServers || {}
     };
   } catch (error) {
-    return client === "vscode" ? { mcp: { servers: {} } } : { mcpServers: {} };
+    return { mcpServers: {} };
   }
 }
 
@@ -44,19 +43,7 @@ export function writeConfig(client: ValidClient, config: ClientConfig): void {
     fs.mkdirSync(configDir, { recursive: true });
   }
 
-  // Validate config structure
-  if (client === "vscode") {
-    if (!config.mcp?.servers || typeof config.mcp.servers !== "object") {
-      throw new Error("Invalid mcp.servers structure for vscode");
-    }
-  } else if (!config.mcpServers || typeof config.mcpServers !== "object") {
-    throw new Error("Invalid mcpServers structure");
-  }
-
-  let existingConfig: ClientConfig = client === "vscode" 
-    ? { mcp: { servers: {} } }
-    : { mcpServers: {} };
-
+  let existingConfig: any = {};
   try {
     if (fs.existsSync(configPath)) {
       existingConfig = JSON.parse(fs.readFileSync(configPath, "utf8"));
@@ -65,27 +52,21 @@ export function writeConfig(client: ValidClient, config: ClientConfig): void {
     // If reading fails, continue with empty existing config
   }
 
-  let mergedConfig;
-  if (client === "vscode" && config.mcp?.servers) {
-    mergedConfig = {
-      ...existingConfig,
-      mcp: {
-        ...existingConfig.mcp,
-        servers: {
-          ...(existingConfig.mcp?.servers || {}),
-          ...config.mcp.servers,
-        },
-      },
-    };
-  } else if (config.mcpServers) {
-    mergedConfig = {
-      ...existingConfig,
-      mcpServers: {
-        ...existingConfig.mcpServers,
-        ...config.mcpServers,
-      },
-    };
-  }
+  const mergedServers = {
+    ...existingConfig.mcpServers,
+    ...config.mcpServers
+  };
 
-  fs.writeFileSync(configPath, JSON.stringify(mergedConfig, null, 2));
+  // For VS Code, preserve all existing settings and just update mcp.servers
+  const finalConfig = client === "vscode" 
+    ? {
+        ...existingConfig,
+        mcp: {
+          ...(existingConfig.mcp || {}),
+          servers: mergedServers
+        }
+      }
+    : { mcpServers: mergedServers };
+
+  fs.writeFileSync(configPath, JSON.stringify(finalConfig, null, 2));
 }

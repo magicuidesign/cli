@@ -60,21 +60,12 @@ export const createPlatformCommand = (passedArgs: string[]) => {
   };
 };
 
-export const getDefaultConfig = (client?: string) => {
+export const getDefaultConfig = () => {
   const args = ["-y", "@magicuidesign/mcp@latest"];
   const command = createPlatformCommand(args);
-
-  return client === "vscode"
-    ? {
-        mcp: {
-          servers: {
-            "@magicuidesign/mcp": command,
-          },
-        },
-      }
-    : {
-        mcpServers: {
-          "@magicuidesign/mcp": command,
-        },
-      };
+  return {
+    mcpServers: {
+      "@magicuidesign/mcp": command,
+    },
+  };
 };
