@@ -26,9 +26,9 @@ export function readConfig(client: ValidClient): ClientConfig {
         mcpServers: rawConfig.mcp.servers
       };
     }
-    // For all other clients or if VS Code config is already in mcpServers format
     return {
-      mcpServers: rawConfig.mcpServers || {}
+      ...rawConfig,
+      mcpServers: rawConfig.mcpServers || {},
     };
   } catch (error) {
     return { mcpServers: {} };
