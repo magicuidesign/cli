@@ -63,7 +63,7 @@ export const createPlatformCommand = (passedArgs: string[]) => {
 export const getDefaultConfig = () => {
   const args = ["-y", "@magicuidesign/mcp@latest"];
   const command = createPlatformCommand(args);
-  
+
   return {
     mcpServers: {
       "@magicuidesign/mcp": command,
