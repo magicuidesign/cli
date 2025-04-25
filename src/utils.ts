@@ -52,8 +52,16 @@ export function writeConfig(client: ValidClient, config: ClientConfig): void {
     // If reading fails, continue with empty existing config
   }
 
+  const mergedConfig = {
+    ...existingConfig,
+    mcpServers: {
+      ...existingConfig.mcpServers,
+      ...config.mcpServers,
+    },
+  };
+
   const mergedServers = {
-    ...existingConfig.mcpServers,
+    ...existingConfig.mcp?.servers,
     ...config.mcpServers
   };
 
@@ -66,7 +74,7 @@ export function writeConfig(client: ValidClient, config: ClientConfig): void {
           servers: mergedServers
         }
       }
-    : { mcpServers: mergedServers };
+    : mergedConfig;
 
   fs.writeFileSync(configPath, JSON.stringify(finalConfig, null, 2));
 }
