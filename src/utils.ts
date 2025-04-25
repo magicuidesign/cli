@@ -37,6 +37,10 @@ export function writeConfig(client: ValidClient, config: ClientConfig): void {
     fs.mkdirSync(configDir, { recursive: true });
   }
 
+  if (!config.mcpServers || typeof config.mcpServers !== "object") {
+    throw new Error("Invalid mcpServers structure");
+  }
+
   let existingConfig: any = {};
   try {
     if (fs.existsSync(configPath)) {
