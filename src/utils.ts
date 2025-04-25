@@ -68,7 +68,7 @@ export function writeConfig(client: ValidClient, config: ClientConfig): void {
     ? {
         ...existingConfig,
         mcp: {
-          ...(existingConfig.mcp || {}),
+          ...existingConfig.mcp,
           servers: mergedServers
         }
       }
