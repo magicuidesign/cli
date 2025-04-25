@@ -20,12 +20,6 @@ export function readConfig(client: ValidClient): ClientConfig {
 
   try {
     const rawConfig = JSON.parse(fs.readFileSync(configPath, "utf8"));
-    // Convert VS Code format to internal format if needed
-    if (client === "vscode" && rawConfig.mcp?.servers) {
-      return {
-        mcpServers: rawConfig.mcp.servers
-      };
-    }
     return {
       ...rawConfig,
       mcpServers: rawConfig.mcpServers || {},
