@@ -39,6 +39,12 @@ export const clientPaths: Record<string, string> = {
   ),
   windsurf: path.join(homeDir, ".codeium", "windsurf", "mcp_config.json"),
   cursor: path.join(homeDir, ".cursor", "mcp.json"),
+  vscode: path.join(
+    baseDir,
+    vscodePath,
+    "..",
+    "settings.json",
+  ),
 };
 
 export const createPlatformCommand = (passedArgs: string[]) => {

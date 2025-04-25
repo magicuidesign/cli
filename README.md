@@ -14,6 +14,7 @@ npx @magicuidesign/cli@latest install <client>
 
 ### Supported Clients
 
+- [x] vscode
 - [x] cursor
 - [x] windsurf
 - [x] claude

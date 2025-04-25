@@ -3,7 +3,8 @@ export type ValidClient =
   | "cline"
   | "roo-cline"
   | "windsurf"
-  | "cursor";
+  | "cursor"
+  | "vscode";
 
 export const VALID_CLIENTS: ValidClient[] = [
   "claude",
@@ -11,6 +12,7 @@ export const VALID_CLIENTS: ValidClient[] = [
   "roo-cline",
   "windsurf",
   "cursor",
+  "vscode",
 ];
 
 export interface ServerConfig {

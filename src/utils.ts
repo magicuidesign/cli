@@ -41,7 +41,7 @@ export function writeConfig(client: ValidClient, config: ClientConfig): void {
     throw new Error("Invalid mcpServers structure");
   }
 
-  let existingConfig: ClientConfig = { mcpServers: {} };
+  let existingConfig: any = {};
   try {
     if (fs.existsSync(configPath)) {
       existingConfig = JSON.parse(fs.readFileSync(configPath, "utf8"));
@@ -58,5 +58,21 @@ export function writeConfig(client: ValidClient, config: ClientConfig): void {
     },
   };
 
-  fs.writeFileSync(configPath, JSON.stringify(mergedConfig, null, 2));
+  const mergedServers = {
+    ...existingConfig.mcp?.servers,
+    ...config.mcpServers
+  };
+
+  // For VS Code, preserve all existing settings and just update mcp.servers
+  const finalConfig = client === "vscode" 
+    ? {
+        ...existingConfig,
+        mcp: {
+          ...existingConfig.mcp,
+          servers: mergedServers
+        }
+      }
+    : mergedConfig;
+
+  fs.writeFileSync(configPath, JSON.stringify(finalConfig, null, 2));
 }
