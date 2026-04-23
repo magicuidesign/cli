@@ -4,7 +4,8 @@ export type ValidClient =
   | "roo-cline"
   | "windsurf"
   | "cursor"
-  | "codex";
+  | "codex"
+  | "vscode";
 
 export const VALID_CLIENTS: ValidClient[] = [
   "claude",
@@ -13,6 +14,7 @@ export const VALID_CLIENTS: ValidClient[] = [
   "windsurf",
   "cursor",
   "codex",
+  "vscode",
 ];
 
 export interface ServerConfig {
@@ -20,9 +22,17 @@ export interface ServerConfig {
   args: string[];
 }
 
-export interface ClientConfig {
+/** MCP config shape used by Claude Desktop, Cursor, Windsurf, Cline, etc. */
+export interface McpServersClientConfig {
   mcpServers: Record<string, ServerConfig>;
 }
+
+/** VS Code native MCP config (`User/mcp.json`) */
+export interface VscodeClientConfig {
+  servers: Record<string, ServerConfig>;
+}
+
+export type ClientConfig = McpServersClientConfig | VscodeClientConfig;
 
 export interface InstallOptions {
   apiKey?: string;

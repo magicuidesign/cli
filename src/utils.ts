@@ -1,7 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import { clientPaths } from "./config.js";
-import type { ClientConfig, ServerConfig, ValidClient } from "./types.js";
+import type {
+  ClientConfig,
+  McpServersClientConfig,
+  ServerConfig,
+  ValidClient,
+  VscodeClientConfig,
+} from "./types.js";
 
 function escapeTomlBasicString(s: string): string {
   return s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
@@ -55,7 +61,10 @@ function formatCodexMcpServerTable(name: string, sc: ServerConfig): string {
   return `${header}\n${cmd}\nargs = [${argStrs.join(", ")}]\n`;
 }
 
-function writeCodexTomlConfig(configPath: string, config: ClientConfig): void {
+function writeCodexTomlConfig(
+  configPath: string,
+  config: McpServersClientConfig,
+): void {
   if (!config.mcpServers || typeof config.mcpServers !== "object") {
     throw new Error("Invalid mcpServers structure");
   }
@@ -93,17 +102,30 @@ export function readConfig(client: ValidClient): ClientConfig {
   const configPath = getConfigPath(client);
 
   if (!fs.existsSync(configPath)) {
-    return { mcpServers: {} };
+    return client === "vscode"
+      ? { servers: {} }
+      : { mcpServers: {} };
   }
 
   try {
     const rawConfig = JSON.parse(fs.readFileSync(configPath, "utf8"));
+    if (client === "vscode") {
+      return {
+        ...rawConfig,
+        servers:
+          rawConfig.servers && typeof rawConfig.servers === "object"
+            ? rawConfig.servers
+            : {},
+      };
+    }
     return {
       ...rawConfig,
       mcpServers: rawConfig.mcpServers || {},
     };
   } catch (error) {
-    return { mcpServers: {} };
+    return client === "vscode"
+      ? { servers: {} }
+      : { mcpServers: {} };
   }
 }
 
@@ -111,7 +133,7 @@ export function writeConfig(client: ValidClient, config: ClientConfig): void {
   const configPath = getConfigPath(client);
 
   if (client === "codex") {
-    writeCodexTomlConfig(configPath, config);
+    writeCodexTomlConfig(configPath, config as McpServersClientConfig);
     return;
   }
 
@@ -121,11 +143,46 @@ export function writeConfig(client: ValidClient, config: ClientConfig): void {
     fs.mkdirSync(configDir, { recursive: true });
   }
 
-  if (!config.mcpServers || typeof config.mcpServers !== "object") {
+  if (client === "vscode") {
+    const vscodeConfig = config as VscodeClientConfig;
+    if (!vscodeConfig.servers || typeof vscodeConfig.servers !== "object") {
+      throw new Error("Invalid servers structure");
+    }
+
+    let existingRaw: Record<string, unknown> = {};
+    try {
+      if (fs.existsSync(configPath)) {
+        existingRaw = JSON.parse(fs.readFileSync(configPath, "utf8"));
+      }
+    } catch {
+      // If reading fails, continue with empty existing config
+    }
+
+    const existingServers =
+      existingRaw.servers &&
+      typeof existingRaw.servers === "object" &&
+      !Array.isArray(existingRaw.servers)
+        ? (existingRaw.servers as Record<string, unknown>)
+        : {};
+
+    const mergedConfig = {
+      ...existingRaw,
+      servers: {
+        ...existingServers,
+        ...vscodeConfig.servers,
+      },
+    };
+
+    fs.writeFileSync(configPath, JSON.stringify(mergedConfig, null, 2));
+    return;
+  }
+
+  const mcpConfig = config as McpServersClientConfig;
+  if (!mcpConfig.mcpServers || typeof mcpConfig.mcpServers !== "object") {
     throw new Error("Invalid mcpServers structure");
   }
 
-  let existingConfig: ClientConfig = { mcpServers: {} };
+  let existingConfig: McpServersClientConfig = { mcpServers: {} };
   try {
     if (fs.existsSync(configPath)) {
       existingConfig = JSON.parse(fs.readFileSync(configPath, "utf8"));
@@ -138,7 +195,7 @@ export function writeConfig(client: ValidClient, config: ClientConfig): void {
     ...existingConfig,
     mcpServers: {
       ...existingConfig.mcpServers,
-      ...config.mcpServers,
+      ...mcpConfig.mcpServers,
     },
   };
 
