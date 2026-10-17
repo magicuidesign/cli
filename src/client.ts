@@ -8,7 +8,7 @@ const execAsync = promisify(exec);
 async function isClientRunning(client: string): Promise<boolean> {
   try {
     const platform = process.platform;
-    const clientProcess = { claude: "Claude" }[client] || client;
+    const clientProcess = ({ claude: "Claude", antigravity: "Antigravity" } as Record<string, string>)[client] || client;
 
     if (platform === "win32") {
       const { stdout } = await execAsync(
@@ -31,7 +31,7 @@ async function isClientRunning(client: string): Promise<boolean> {
 }
 
 async function restartClient(client: string): Promise<void> {
-  const clientProcess = { claude: "Claude" }[client] || client;
+  const clientProcess = ({ claude: "Claude", antigravity: "Antigravity" } as Record<string, string>)[client] || client;
   const platform = process.platform;
 
   try {

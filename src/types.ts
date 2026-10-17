@@ -5,7 +5,8 @@ export type ValidClient =
   | "windsurf"
   | "cursor"
   | "codex"
-  | "vscode";
+  | "vscode"
+  | "antigravity";
 
 export const VALID_CLIENTS: ValidClient[] = [
   "claude",
@@ -15,6 +16,7 @@ export const VALID_CLIENTS: ValidClient[] = [
   "cursor",
   "codex",
   "vscode",
+  "antigravity",
 ];
 
 export interface ServerConfig {

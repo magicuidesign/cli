@@ -21,6 +21,7 @@ npx @magicuidesign/cli@latest install <client>
 - [x] roo-cline
 - [x] codex
 - [x] vscode
+- [x] antigravity
 
 ## Manual Installation
 

@@ -45,6 +45,7 @@ export const clientPaths: Record<string, string> = {
   windsurf: path.join(homeDir, ".codeium", "windsurf", "mcp_config.json"),
   cursor: path.join(homeDir, ".cursor", "mcp.json"),
   vscode: path.join(baseDir, "Code", "User", "mcp.json"),
+  antigravity: path.join(homeDir, ".gemini", "config", "mcp_config.json"),
 };
 
 export const createPlatformCommand = (passedArgs: string[]) => {
