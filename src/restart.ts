@@ -5,52 +5,32 @@ import { promisify } from "node:util";
 
 const execAsync = promisify(exec);
 
+const isWindows = process.platform === "win32";
+
 async function isProcessRunning(processName: string): Promise<boolean> {
   try {
-    const platform = process.platform;
-
-    if (platform === "win32") {
+    if (isWindows) {
       const { stdout } = await execAsync(
         `tasklist /FI "IMAGENAME eq ${processName}.exe" /NH`,
       );
       return stdout.includes(`${processName}.exe`);
-    } else if (platform === "darwin") {
-      const { stdout } = await execAsync(`pgrep -x "${processName}"`);
-      return !!stdout.trim();
-    } else if (platform === "linux") {
-      const { stdout } = await execAsync(
-        `pgrep -f "${processName.toLowerCase()}"`,
-      );
-      return !!stdout.trim();
     }
-    return false;
+    const { stdout } = await execAsync(`pgrep -x "${processName}"`);
+    return !!stdout.trim();
   } catch {
     return false;
   }
 }
 
 async function restartProcess(processName: string): Promise<void> {
-  const platform = process.platform;
-
   try {
-    if (platform === "win32") {
-      await execAsync(`taskkill /F /IM "${processName}.exe"`);
-    } else if (platform === "darwin") {
-      await execAsync(`killall "${processName}"`);
-    } else if (platform === "linux") {
-      await execAsync(`pkill -f "${processName.toLowerCase()}"`);
-    }
-
+    await execAsync(
+      isWindows ? `taskkill /F /IM "${processName}.exe"` : `killall "${processName}"`,
+    );
     await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    if (platform === "win32") {
-      await execAsync(`start "" "${processName}.exe"`);
-    } else if (platform === "darwin") {
-      await execAsync(`open -a "${processName}"`);
-    } else if (platform === "linux") {
-      await execAsync(processName.toLowerCase());
-    }
-
+    await execAsync(
+      isWindows ? `start "" "${processName}.exe"` : `open -a "${processName}"`,
+    );
     console.log(chalk.green(`${processName} has been restarted.`));
   } catch (error) {
     console.error(chalk.red(`Failed to restart ${processName}:`), error);

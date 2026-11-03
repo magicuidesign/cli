@@ -12,7 +12,7 @@ export interface ClientDefinition {
   serverName: string;
   /** VS Code resolves npx itself on Windows. Every other client needs `cmd /c`. */
   cmdOnWindows: boolean;
-  /** Process to restart after install. Unset for clients that host the terminal this CLI runs in. */
+  /** Only Claude Desktop is safe to kill. The IDE clients may host the terminal this CLI runs in. */
   restartProcessName?: string;
 }
 
@@ -55,7 +55,6 @@ const clients = {
     file: mcpServersJson,
     serverName: "@magicuidesign/mcp",
     cmdOnWindows: true,
-    restartProcessName: "cline",
   },
   "roo-cline": {
     displayName: "Roo-cline",
@@ -63,7 +62,6 @@ const clients = {
     file: mcpServersJson,
     serverName: "@magicuidesign/mcp",
     cmdOnWindows: true,
-    restartProcessName: "roo-cline",
   },
   windsurf: {
     displayName: "Windsurf",
@@ -71,7 +69,6 @@ const clients = {
     file: mcpServersJson,
     serverName: "@magicuidesign/mcp",
     cmdOnWindows: true,
-    restartProcessName: "windsurf",
   },
   cursor: {
     displayName: "Cursor",
@@ -79,7 +76,6 @@ const clients = {
     file: mcpServersJson,
     serverName: "@magicuidesign/mcp",
     cmdOnWindows: true,
-    restartProcessName: "cursor",
   },
   codex: {
     displayName: "Codex",
