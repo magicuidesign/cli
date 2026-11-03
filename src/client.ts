@@ -8,7 +8,7 @@ const execAsync = promisify(exec);
 async function isClientRunning(client: string): Promise<boolean> {
   try {
     const platform = process.platform;
-    const clientProcess = ({ claude: "Claude", antigravity: "Antigravity" } as Record<string, string>)[client] || client;
+    const clientProcess = { claude: "Claude" }[client] || client;
 
     if (platform === "win32") {
       const { stdout } = await execAsync(
@@ -31,7 +31,7 @@ async function isClientRunning(client: string): Promise<boolean> {
 }
 
 async function restartClient(client: string): Promise<void> {
-  const clientProcess = ({ claude: "Claude", antigravity: "Antigravity" } as Record<string, string>)[client] || client;
+  const clientProcess = { claude: "Claude" }[client] || client;
   const platform = process.platform;
 
   try {
@@ -62,6 +62,8 @@ async function restartClient(client: string): Promise<void> {
 export async function promptForRestart(client: string): Promise<void> {
   // VS Code reloads mcp.json on change, and its process name differs per version.
   if (client === "vscode") return;
+  // Antigravity hosts the terminal this CLI runs in; killing it kills the CLI too.
+  if (client === "antigravity") return;
 
   const isRunning = await isClientRunning(client);
   if (!isRunning) return;
