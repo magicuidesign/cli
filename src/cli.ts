@@ -38,9 +38,7 @@ program
       await install(client);
     } catch (error) {
       console.error(
-        chalk.red(
-          error instanceof Error ? error.message : "Unknown error occurred",
-        ),
+        chalk.red(error instanceof Error ? error.message : String(error)),
       );
       process.exit(1);
     }

@@ -29,11 +29,6 @@ export async function install(clientName: ValidClient): Promise<void> {
     }
   } catch (error) {
     spinner.fail(`Failed to install configuration for ${client.displayName}`);
-    console.error(
-      chalk.red(
-        `Error: ${error instanceof Error ? error.message : String(error)}`,
-      ),
-    );
     throw error;
   }
 }
