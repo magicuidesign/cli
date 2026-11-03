@@ -60,6 +60,9 @@ async function restartClient(client: string): Promise<void> {
 }
 
 export async function promptForRestart(client: string): Promise<void> {
+  // VS Code reloads mcp.json on change, and its process name differs per version.
+  if (client === "vscode") return;
+
   const isRunning = await isClientRunning(client);
   if (!isRunning) return;
 

@@ -20,6 +20,7 @@ npx @magicuidesign/cli@latest install <client>
 - [x] cline
 - [x] roo-cline
 - [x] codex
+- [x] vscode
 
 ## Manual Installation
 

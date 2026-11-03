@@ -5,15 +5,21 @@ import { getDefaultConfig } from "./config.js";
 import type { ValidClient } from "./types.js";
 import { writeConfig } from "./utils.js";
 
+const CLIENT_DISPLAY_NAMES: Partial<Record<ValidClient, string>> = {
+  vscode: "VS Code",
+};
+
 export async function install(client: ValidClient): Promise<void> {
-  const capitalizedClient = client.charAt(0).toUpperCase() + client.slice(1);
+  const capitalizedClient =
+    CLIENT_DISPLAY_NAMES[client] ??
+    client.charAt(0).toUpperCase() + client.slice(1);
 
   const spinner = ora(
     `Installing configuration for ${capitalizedClient}...`,
   ).start();
 
   try {
-    const config = { ...getDefaultConfig() };
+    const config = getDefaultConfig(client);
 
     writeConfig(client, config);
     spinner.succeed(

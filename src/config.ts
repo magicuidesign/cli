@@ -1,5 +1,6 @@
 import os from "node:os";
 import path from "node:path";
+import type { ValidClient, VscodeClientConfig, McpServersClientConfig } from "./types.js";
 
 const homeDir = os.homedir();
 
@@ -43,6 +44,7 @@ export const clientPaths: Record<string, string> = {
   ),
   windsurf: path.join(homeDir, ".codeium", "windsurf", "mcp_config.json"),
   cursor: path.join(homeDir, ".cursor", "mcp.json"),
+  vscode: path.join(baseDir, "Code", "User", "mcp.json"),
 };
 
 export const createPlatformCommand = (passedArgs: string[]) => {
@@ -58,7 +60,20 @@ export const createPlatformCommand = (passedArgs: string[]) => {
   };
 };
 
-export const getDefaultConfig = () => {
+export function getDefaultConfig(
+  client: ValidClient,
+): McpServersClientConfig | VscodeClientConfig {
+  if (client === "vscode") {
+    return {
+      servers: {
+        magicui: {
+          command: "npx",
+          args: ["-y", "@magicuidesign/mcp@latest"],
+        },
+      },
+    };
+  }
+
   const args = ["-y", "@magicuidesign/mcp@latest"];
   const command = createPlatformCommand(args);
 
@@ -67,4 +82,4 @@ export const getDefaultConfig = () => {
       "@magicuidesign/mcp": command,
     },
   };
-};
+}
