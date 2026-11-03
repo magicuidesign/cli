@@ -6,7 +6,6 @@ import type {
   McpServersClientConfig,
   ServerConfig,
   ValidClient,
-  VscodeClientConfig,
 } from "./types.js";
 
 function escapeTomlBasicString(s: string): string {
@@ -112,54 +111,28 @@ export function writeConfig(client: ValidClient, config: ClientConfig): void {
     fs.mkdirSync(configDir, { recursive: true });
   }
 
-  if (client === "vscode") {
-    const vscodeConfig = config as VscodeClientConfig;
-    if (!vscodeConfig.servers || typeof vscodeConfig.servers !== "object") {
-      throw new Error("Invalid servers structure");
-    }
-
-    let existingRaw: Record<string, unknown> = {};
-    if (fs.existsSync(configPath)) {
-      const raw = fs.readFileSync(configPath, "utf8");
-      if (raw.trim()) existingRaw = JSON.parse(raw);
-    }
-
-    const existingServers =
-      existingRaw.servers &&
-      typeof existingRaw.servers === "object" &&
-      !Array.isArray(existingRaw.servers)
-        ? (existingRaw.servers as Record<string, unknown>)
-        : {};
-
-    const mergedConfig = {
-      ...existingRaw,
-      servers: {
-        ...existingServers,
-        ...vscodeConfig.servers,
-      },
-    };
-
-    fs.writeFileSync(configPath, JSON.stringify(mergedConfig, null, 2));
-    return;
+  const rootKey = client === "vscode" ? "servers" : "mcpServers";
+  const servers = (config as unknown as Record<string, unknown>)[rootKey];
+  if (!servers || typeof servers !== "object") {
+    throw new Error(`Invalid ${rootKey} structure`);
   }
 
-  const mcpConfig = config as McpServersClientConfig;
-  if (!mcpConfig.mcpServers || typeof mcpConfig.mcpServers !== "object") {
-    throw new Error("Invalid mcpServers structure");
-  }
-
-  let existingConfig: McpServersClientConfig = { mcpServers: {} };
+  let existingRaw: Record<string, unknown> = {};
   if (fs.existsSync(configPath)) {
     const raw = fs.readFileSync(configPath, "utf8");
-    if (raw.trim()) existingConfig = JSON.parse(raw);
+    if (raw.trim()) existingRaw = JSON.parse(raw);
   }
 
+  const existingServers =
+    existingRaw[rootKey] &&
+    typeof existingRaw[rootKey] === "object" &&
+    !Array.isArray(existingRaw[rootKey])
+      ? (existingRaw[rootKey] as Record<string, unknown>)
+      : {};
+
   const mergedConfig = {
-    ...existingConfig,
-    mcpServers: {
-      ...existingConfig.mcpServers,
-      ...mcpConfig.mcpServers,
-    },
+    ...existingRaw,
+    [rootKey]: { ...existingServers, ...servers },
   };
 
   fs.writeFileSync(configPath, JSON.stringify(mergedConfig, null, 2));
