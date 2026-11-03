@@ -17,23 +17,16 @@ export async function install(clientName: ValidClient): Promise<void> {
     );
 
     console.log(
-      chalk.green(`${client.displayName} configuration updated successfully`),
-    );
-    console.log(
       chalk.yellow(
         `You may need to restart ${client.displayName} to see the Magic MCP server.`,
       ),
     );
-    if (client.restartProcessName) {
-      await promptForRestart(client.displayName, client.restartProcessName);
-    }
   } catch (error) {
     spinner.fail(`Failed to install configuration for ${client.displayName}`);
-    console.error(
-      chalk.red(
-        `Error: ${error instanceof Error ? error.message : String(error)}`,
-      ),
-    );
     throw error;
+  }
+
+  if (client.restartProcessName) {
+    await promptForRestart(client.displayName, client.restartProcessName);
   }
 }

@@ -2,15 +2,18 @@
 
 import chalk from "chalk";
 import { Command } from "commander";
+import { createRequire } from "node:module";
 import { install } from "./index.js";
 import { isValidClient, VALID_CLIENTS } from "./clients.js";
+
+const { version } = createRequire(import.meta.url)("../package.json");
 
 const program = new Command();
 
 program
   .name("@magicuidesign/cli")
   .description("Install Magic UI Components or MCP configuration")
-  .version("1.0.0");
+  .version(version);
 
 program
   .command("install")
@@ -35,9 +38,7 @@ program
       await install(client);
     } catch (error) {
       console.error(
-        chalk.red(
-          error instanceof Error ? error.message : "Unknown error occurred",
-        ),
+        chalk.red(error instanceof Error ? error.message : String(error)),
       );
       process.exit(1);
     }
