@@ -28,7 +28,7 @@ export async function install(client: ValidClient): Promise<void> {
         `You may need to restart ${capitalizedClient} to see the Magic MCP server.`,
       ),
     );
-    await promptForRestart(client);
+    if (client !== "codex") await promptForRestart(client);
   } catch (error) {
     spinner.fail(`Failed to install configuration for ${capitalizedClient}`);
     console.error(

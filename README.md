@@ -19,6 +19,7 @@ npx @magicuidesign/cli@latest install <client>
 - [x] claude
 - [x] cline
 - [x] roo-cline
+- [x] codex
 
 ## Manual Installation
 
