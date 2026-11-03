@@ -1,42 +1,34 @@
 import chalk from "chalk";
 import ora from "ora";
-import { promptForRestart } from "./client.js";
-import { getDefaultConfig } from "./config.js";
-import type { ValidClient } from "./types.js";
-import { writeConfig } from "./utils.js";
+import { CLIENTS, type ValidClient } from "./clients.js";
+import { promptForRestart } from "./restart.js";
+import { writeServerConfig } from "./write.js";
 
-const CLIENT_DISPLAY_NAMES: Partial<Record<ValidClient, string>> = {
-  vscode: "VS Code",
-};
-
-export async function install(client: ValidClient): Promise<void> {
-  const capitalizedClient =
-    CLIENT_DISPLAY_NAMES[client] ??
-    client.charAt(0).toUpperCase() + client.slice(1);
-
+export async function install(clientName: ValidClient): Promise<void> {
+  const client = CLIENTS[clientName];
   const spinner = ora(
-    `Installing configuration for ${capitalizedClient}...`,
+    `Installing configuration for ${client.displayName}...`,
   ).start();
 
   try {
-    const config = getDefaultConfig(client);
-
-    writeConfig(client, config);
+    writeServerConfig(client);
     spinner.succeed(
-      `Successfully installed configuration for ${capitalizedClient}`,
+      `Successfully installed configuration for ${client.displayName}`,
     );
 
     console.log(
-      chalk.green(`${capitalizedClient} configuration updated successfully`),
+      chalk.green(`${client.displayName} configuration updated successfully`),
     );
     console.log(
       chalk.yellow(
-        `You may need to restart ${capitalizedClient} to see the Magic MCP server.`,
+        `You may need to restart ${client.displayName} to see the Magic MCP server.`,
       ),
     );
-    if (client !== "codex") await promptForRestart(client);
+    if (client.restartProcessName) {
+      await promptForRestart(client.displayName, client.restartProcessName);
+    }
   } catch (error) {
-    spinner.fail(`Failed to install configuration for ${capitalizedClient}`);
+    spinner.fail(`Failed to install configuration for ${client.displayName}`);
     console.error(
       chalk.red(
         `Error: ${error instanceof Error ? error.message : String(error)}`,

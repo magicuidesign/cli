@@ -3,7 +3,7 @@
 import chalk from "chalk";
 import { Command } from "commander";
 import { install } from "./index.js";
-import { VALID_CLIENTS } from "./types.js";
+import { isValidClient, VALID_CLIENTS } from "./clients.js";
 
 const program = new Command();
 
@@ -20,7 +20,7 @@ program
     `The client to install for (${VALID_CLIENTS.join(", ")})`,
   )
   .action(async (client: string) => {
-    if (!VALID_CLIENTS.includes(client as any)) {
+    if (!isValidClient(client)) {
       console.error(
         chalk.red(
           `Invalid client "${client}". Available clients: ${VALID_CLIENTS.join(
@@ -32,7 +32,7 @@ program
     }
 
     try {
-      await install(client as any);
+      await install(client);
     } catch (error) {
       console.error(
         chalk.red(
