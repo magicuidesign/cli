@@ -64,13 +64,12 @@ function escapeTomlBasicString(s: string): string {
 }
 
 const CODEX_MCP_TABLE_HEADER =
-  /^\[mcp_servers\.(?:"([^"]+)"|([a-zA-Z0-9_.-]+))\]\s*$/;
+  /^\[\s*mcp_servers\s*\.\s*(?:"([^"]+)"|'([^']+)'|([A-Za-z0-9_-]+))\s*\]\s*(?:#.*)?$/;
 
 function mcpServerNameFromTableHeader(line: string): string | undefined {
-  if (!line.startsWith("[mcp_servers.")) return undefined;
   const match = line.match(CODEX_MCP_TABLE_HEADER);
   if (!match) return undefined;
-  return match[1] ?? match[2];
+  return match[1] ?? match[2] ?? match[3];
 }
 
 function removeTomlServerTable(content: string, name: string): string {
