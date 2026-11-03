@@ -22,7 +22,10 @@ const platform = process.platform as keyof typeof platformPaths;
 const { baseDir, vscodePath } = platformPaths[platform];
 
 export const clientPaths: Record<string, string> = {
-  codex: path.join(homeDir, ".codex", "config.toml"),
+  codex: path.join(
+    process.env.CODEX_HOME || path.join(homeDir, ".codex"),
+    "config.toml",
+  ),
   claude: path.join(baseDir, "Claude", "claude_desktop_config.json"),
   cline: path.join(
     baseDir,

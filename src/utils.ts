@@ -28,14 +28,15 @@ function removeCodexMcpServerBlocks(
   let droppingBlock = false;
 
   for (const line of lines) {
-    if (droppingBlock && !line.startsWith("[")) {
+    const header = line.trimStart();
+    if (droppingBlock && !header.startsWith("[")) {
       continue;
     }
     if (droppingBlock) {
       droppingBlock = false;
     }
 
-    const serverName = mcpServerNameFromTableHeader(line);
+    const serverName = mcpServerNameFromTableHeader(header);
     if (serverName && serverNamesToReplace.has(serverName)) {
       droppingBlock = true;
       continue;
