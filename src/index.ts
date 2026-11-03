@@ -1,8 +1,8 @@
 import chalk from "chalk";
 import ora from "ora";
 import { CLIENTS, type ValidClient } from "./clients.js";
-import { promptForRestart } from "./client.js";
-import { writeServerConfig } from "./utils.js";
+import { promptForRestart } from "./restart.js";
+import { writeServerConfig } from "./write.js";
 
 export async function install(clientName: ValidClient): Promise<void> {
   const client = CLIENTS[clientName];
