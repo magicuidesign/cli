@@ -8,8 +8,7 @@ const execAsync = promisify(exec);
 async function isClientRunning(client: string): Promise<boolean> {
   try {
     const platform = process.platform;
-    const clientProcess =
-      { claude: "Claude", vscode: "Code" }[client] || client;
+    const clientProcess = { claude: "Claude" }[client] || client;
 
     if (platform === "win32") {
       const { stdout } = await execAsync(
@@ -32,18 +31,14 @@ async function isClientRunning(client: string): Promise<boolean> {
 }
 
 async function restartClient(client: string): Promise<void> {
-  const clientProcess =
-    { claude: "Claude", vscode: "Code" }[client] || client;
+  const clientProcess = { claude: "Claude" }[client] || client;
   const platform = process.platform;
-  const vscodeDarwinAppName = "Visual Studio Code";
 
   try {
     if (platform === "win32") {
       await execAsync(`taskkill /F /IM "${clientProcess}.exe"`);
     } else if (platform === "darwin") {
-      const killTarget =
-        client === "vscode" ? "Code" : clientProcess;
-      await execAsync(`killall "${killTarget}"`);
+      await execAsync(`killall "${clientProcess}"`);
     } else if (platform === "linux") {
       await execAsync(`pkill -f "${clientProcess.toLowerCase()}"`);
     }
@@ -53,9 +48,7 @@ async function restartClient(client: string): Promise<void> {
     if (platform === "win32") {
       await execAsync(`start "" "${clientProcess}.exe"`);
     } else if (platform === "darwin") {
-      const openTarget =
-        client === "vscode" ? vscodeDarwinAppName : clientProcess;
-      await execAsync(`open -a "${openTarget}"`);
+      await execAsync(`open -a "${clientProcess}"`);
     } else if (platform === "linux") {
       await execAsync(clientProcess.toLowerCase());
     }
@@ -67,6 +60,9 @@ async function restartClient(client: string): Promise<void> {
 }
 
 export async function promptForRestart(client: string): Promise<void> {
+  // VS Code reloads mcp.json on change, and its process name differs per version.
+  if (client === "vscode") return;
+
   const isRunning = await isClientRunning(client);
   if (!isRunning) return;
 

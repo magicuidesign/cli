@@ -150,12 +150,9 @@ export function writeConfig(client: ValidClient, config: ClientConfig): void {
     }
 
     let existingRaw: Record<string, unknown> = {};
-    try {
-      if (fs.existsSync(configPath)) {
-        existingRaw = JSON.parse(fs.readFileSync(configPath, "utf8"));
-      }
-    } catch {
-      // If reading fails, continue with empty existing config
+    if (fs.existsSync(configPath)) {
+      const raw = fs.readFileSync(configPath, "utf8");
+      if (raw.trim()) existingRaw = JSON.parse(raw);
     }
 
     const existingServers =
@@ -183,12 +180,9 @@ export function writeConfig(client: ValidClient, config: ClientConfig): void {
   }
 
   let existingConfig: McpServersClientConfig = { mcpServers: {} };
-  try {
-    if (fs.existsSync(configPath)) {
-      existingConfig = JSON.parse(fs.readFileSync(configPath, "utf8"));
-    }
-  } catch (error) {
-    // If reading fails, continue with empty existing config
+  if (fs.existsSync(configPath)) {
+    const raw = fs.readFileSync(configPath, "utf8");
+    if (raw.trim()) existingConfig = JSON.parse(raw);
   }
 
   const mergedConfig = {
