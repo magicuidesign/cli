@@ -17,9 +17,6 @@ export async function install(clientName: ValidClient): Promise<void> {
     );
 
     console.log(
-      chalk.green(`${client.displayName} configuration updated successfully`),
-    );
-    console.log(
       chalk.yellow(
         `You may need to restart ${client.displayName} to see the Magic MCP server.`,
       ),
