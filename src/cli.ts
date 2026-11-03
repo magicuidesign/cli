@@ -2,15 +2,18 @@
 
 import chalk from "chalk";
 import { Command } from "commander";
+import { createRequire } from "node:module";
 import { install } from "./index.js";
 import { isValidClient, VALID_CLIENTS } from "./clients.js";
+
+const { version } = createRequire(import.meta.url)("../package.json");
 
 const program = new Command();
 
 program
   .name("@magicuidesign/cli")
   .description("Install Magic UI Components or MCP configuration")
-  .version("1.0.0");
+  .version(version);
 
 program
   .command("install")
