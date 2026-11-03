@@ -24,11 +24,12 @@ export async function install(clientName: ValidClient): Promise<void> {
         `You may need to restart ${client.displayName} to see the Magic MCP server.`,
       ),
     );
-    if (client.restartProcessName) {
-      await promptForRestart(client.displayName, client.restartProcessName);
-    }
   } catch (error) {
     spinner.fail(`Failed to install configuration for ${client.displayName}`);
     throw error;
+  }
+
+  if (client.restartProcessName) {
+    await promptForRestart(client.displayName, client.restartProcessName);
   }
 }

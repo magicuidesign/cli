@@ -43,14 +43,16 @@ export async function promptForRestart(
 ): Promise<void> {
   if (!(await isProcessRunning(processName))) return;
 
-  const { shouldRestart } = await inquirer.prompt<{ shouldRestart: boolean }>([
-    {
-      type: "confirm",
-      name: "shouldRestart",
-      message: `Would you like to restart ${chalk.bold(displayName)} now?`,
-      default: true,
-    },
-  ]);
+  const { shouldRestart } = await inquirer
+    .prompt<{ shouldRestart: boolean }>([
+      {
+        type: "confirm",
+        name: "shouldRestart",
+        message: `Would you like to restart ${chalk.bold(displayName)} now?`,
+        default: true,
+      },
+    ])
+    .catch(() => ({ shouldRestart: false }));
 
   if (shouldRestart) {
     console.log(`Restarting ${displayName} app...`);
