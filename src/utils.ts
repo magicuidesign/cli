@@ -90,43 +90,12 @@ function writeCodexTomlConfig(
   fs.writeFileSync(configPath, `${trimmed}${sep}${additions}`.trimEnd() + "\n");
 }
 
-export function getConfigPath(client: ValidClient): string {
+function getConfigPath(client: ValidClient): string {
   const configPath = clientPaths[client];
   if (!configPath) {
     throw new Error(`Invalid client: ${client}`);
   }
   return configPath;
-}
-
-export function readConfig(client: ValidClient): ClientConfig {
-  const configPath = getConfigPath(client);
-
-  if (!fs.existsSync(configPath)) {
-    return client === "vscode"
-      ? { servers: {} }
-      : { mcpServers: {} };
-  }
-
-  try {
-    const rawConfig = JSON.parse(fs.readFileSync(configPath, "utf8"));
-    if (client === "vscode") {
-      return {
-        ...rawConfig,
-        servers:
-          rawConfig.servers && typeof rawConfig.servers === "object"
-            ? rawConfig.servers
-            : {},
-      };
-    }
-    return {
-      ...rawConfig,
-      mcpServers: rawConfig.mcpServers || {},
-    };
-  } catch (error) {
-    return client === "vscode"
-      ? { servers: {} }
-      : { mcpServers: {} };
-  }
 }
 
 export function writeConfig(client: ValidClient, config: ClientConfig): void {

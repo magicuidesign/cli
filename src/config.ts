@@ -4,23 +4,14 @@ import type { ValidClient, VscodeClientConfig, McpServersClientConfig } from "./
 
 const homeDir = os.homedir();
 
-const platformPaths = {
-  win32: {
-    baseDir: process.env.APPDATA || path.join(homeDir, "AppData", "Roaming"),
-    vscodePath: path.join("Code", "User", "globalStorage"),
-  },
-  darwin: {
-    baseDir: path.join(homeDir, "Library", "Application Support"),
-    vscodePath: path.join("Code", "User", "globalStorage"),
-  },
-  linux: {
-    baseDir: process.env.XDG_CONFIG_HOME || path.join(homeDir, ".config"),
-    vscodePath: path.join("Code/User/globalStorage"),
-  },
+const platformBaseDirs = {
+  win32: process.env.APPDATA || path.join(homeDir, "AppData", "Roaming"),
+  darwin: path.join(homeDir, "Library", "Application Support"),
+  linux: process.env.XDG_CONFIG_HOME || path.join(homeDir, ".config"),
 };
 
-const platform = process.platform as keyof typeof platformPaths;
-const { baseDir, vscodePath } = platformPaths[platform];
+const baseDir = platformBaseDirs[process.platform as keyof typeof platformBaseDirs];
+const vscodePath = path.join("Code", "User", "globalStorage");
 
 export const clientPaths: Record<string, string> = {
   codex: path.join(

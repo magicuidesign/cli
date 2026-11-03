@@ -35,7 +35,3 @@ export interface VscodeClientConfig {
 }
 
 export type ClientConfig = McpServersClientConfig | VscodeClientConfig;
-
-export interface InstallOptions {
-  apiKey?: string;
-}
