@@ -1,12 +1,63 @@
 import fs from "node:fs";
 import path from "node:path";
-import { clientPaths } from "./config.js";
-import type {
-  ClientConfig,
-  McpServersClientConfig,
-  ServerConfig,
-  ValidClient,
-} from "./types.js";
+import type { ClientDefinition } from "./clients.js";
+
+interface ServerConfig {
+  command: string;
+  args: string[];
+}
+
+function serverConfigFor(client: ClientDefinition): ServerConfig {
+  const args = ["-y", "@magicuidesign/mcp@latest"];
+  return client.cmdOnWindows && process.platform === "win32"
+    ? { command: "cmd", args: ["/c", "npx", ...args] }
+    : { command: "npx", args };
+}
+
+export function writeServerConfig(client: ClientDefinition): void {
+  const configDir = path.dirname(client.configPath);
+  if (!fs.existsSync(configDir)) {
+    fs.mkdirSync(configDir, { recursive: true });
+  }
+
+  const server = serverConfigFor(client);
+  if (client.file.kind === "toml") {
+    writeTomlServer(client.configPath, client.serverName, server);
+  } else {
+    writeJsonServer(
+      client.configPath,
+      client.file.rootKey,
+      client.serverName,
+      server,
+    );
+  }
+}
+function readJsonObject(configPath: string): Record<string, unknown> {
+  if (!fs.existsSync(configPath)) return {};
+  const raw = fs.readFileSync(configPath, "utf8");
+  return raw.trim() ? JSON.parse(raw) : {};
+}
+
+function writeJsonServer(
+  configPath: string,
+  rootKey: string,
+  name: string,
+  server: ServerConfig,
+): void {
+  const existing = readJsonObject(configPath);
+  const servers = existing[rootKey];
+  const existingServers =
+    servers && typeof servers === "object" && !Array.isArray(servers)
+      ? (servers as Record<string, unknown>)
+      : {};
+
+  const merged = {
+    ...existing,
+    [rootKey]: { ...existingServers, [name]: server },
+  };
+
+  fs.writeFileSync(configPath, JSON.stringify(merged, null, 2));
+}
 
 function escapeTomlBasicString(s: string): string {
   return s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
@@ -22,118 +73,40 @@ function mcpServerNameFromTableHeader(line: string): string | undefined {
   return match[1] ?? match[2];
 }
 
-const MCP_SERVER_BLOCK_END = /\r?\n/;
-
-function removeCodexMcpServerBlocks(
-  content: string,
-  serverNamesToReplace: Set<string>,
-): string {
-  const lines = content.split(MCP_SERVER_BLOCK_END);
+function removeTomlServerTable(content: string, name: string): string {
   const kept: string[] = [];
   let droppingBlock = false;
 
-  for (const line of lines) {
+  for (const line of content.split(/\r?\n/)) {
     const header = line.trimStart();
     if (droppingBlock && !header.startsWith("[")) {
       continue;
     }
-    if (droppingBlock) {
-      droppingBlock = false;
-    }
-
-    const serverName = mcpServerNameFromTableHeader(header);
-    if (serverName && serverNamesToReplace.has(serverName)) {
-      droppingBlock = true;
-      continue;
-    }
-
-    kept.push(line);
+    droppingBlock = mcpServerNameFromTableHeader(header) === name;
+    if (!droppingBlock) kept.push(line);
   }
 
   return kept.join("\n");
 }
 
-function formatCodexMcpServerTable(name: string, sc: ServerConfig): string {
+function formatTomlServerTable(name: string, server: ServerConfig): string {
   const header = `[mcp_servers."${escapeTomlBasicString(name)}"]`;
-  const cmd = `command = "${escapeTomlBasicString(sc.command)}"`;
-  const argStrs = sc.args.map((a) => `"${escapeTomlBasicString(a)}"`);
-  return `${header}\n${cmd}\nargs = [${argStrs.join(", ")}]\n`;
+  const cmd = `command = "${escapeTomlBasicString(server.command)}"`;
+  const args = server.args.map((a) => `"${escapeTomlBasicString(a)}"`);
+  return `${header}\n${cmd}\nargs = [${args.join(", ")}]\n`;
 }
 
-function writeCodexTomlConfig(
+function writeTomlServer(
   configPath: string,
-  config: McpServersClientConfig,
+  name: string,
+  server: ServerConfig,
 ): void {
-  if (!config.mcpServers || typeof config.mcpServers !== "object") {
-    throw new Error("Invalid mcpServers structure");
-  }
+  const content = fs.existsSync(configPath)
+    ? fs.readFileSync(configPath, "utf8")
+    : "";
 
-  const configDir = path.dirname(configPath);
-  if (!fs.existsSync(configDir)) {
-    fs.mkdirSync(configDir, { recursive: true });
-  }
-
-  const serverNames = new Set(Object.keys(config.mcpServers));
-  let content = "";
-  if (fs.existsSync(configPath)) {
-    content = fs.readFileSync(configPath, "utf8");
-  }
-
-  content = removeCodexMcpServerBlocks(content, serverNames);
-  const additions = Object.entries(config.mcpServers)
-    .map(([name, sc]) => formatCodexMcpServerTable(name, sc))
-    .join("\n");
-
-  const trimmed = content.trimEnd();
-  const sep = trimmed.length > 0 ? "\n\n" : "";
-  fs.writeFileSync(configPath, `${trimmed}${sep}${additions}`.trimEnd() + "\n");
-}
-
-function getConfigPath(client: ValidClient): string {
-  const configPath = clientPaths[client];
-  if (!configPath) {
-    throw new Error(`Invalid client: ${client}`);
-  }
-  return configPath;
-}
-
-export function writeConfig(client: ValidClient, config: ClientConfig): void {
-  const configPath = getConfigPath(client);
-
-  if (client === "codex") {
-    writeCodexTomlConfig(configPath, config as McpServersClientConfig);
-    return;
-  }
-
-  const configDir = path.dirname(configPath);
-
-  if (!fs.existsSync(configDir)) {
-    fs.mkdirSync(configDir, { recursive: true });
-  }
-
-  const rootKey = client === "vscode" ? "servers" : "mcpServers";
-  const servers = (config as unknown as Record<string, unknown>)[rootKey];
-  if (!servers || typeof servers !== "object") {
-    throw new Error(`Invalid ${rootKey} structure`);
-  }
-
-  let existingRaw: Record<string, unknown> = {};
-  if (fs.existsSync(configPath)) {
-    const raw = fs.readFileSync(configPath, "utf8");
-    if (raw.trim()) existingRaw = JSON.parse(raw);
-  }
-
-  const existingServers =
-    existingRaw[rootKey] &&
-    typeof existingRaw[rootKey] === "object" &&
-    !Array.isArray(existingRaw[rootKey])
-      ? (existingRaw[rootKey] as Record<string, unknown>)
-      : {};
-
-  const mergedConfig = {
-    ...existingRaw,
-    [rootKey]: { ...existingServers, ...servers },
-  };
-
-  fs.writeFileSync(configPath, JSON.stringify(mergedConfig, null, 2));
+  const rest = removeTomlServerTable(content, name).trimEnd();
+  const sep = rest.length > 0 ? "\n\n" : "";
+  const table = formatTomlServerTable(name, server);
+  fs.writeFileSync(configPath, `${rest}${sep}${table}`.trimEnd() + "\n");
 }

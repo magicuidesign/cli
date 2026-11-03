@@ -5,22 +5,21 @@ import { promisify } from "node:util";
 
 const execAsync = promisify(exec);
 
-async function isClientRunning(client: string): Promise<boolean> {
+async function isProcessRunning(processName: string): Promise<boolean> {
   try {
     const platform = process.platform;
-    const clientProcess = { claude: "Claude" }[client] || client;
 
     if (platform === "win32") {
       const { stdout } = await execAsync(
-        `tasklist /FI "IMAGENAME eq ${clientProcess}.exe" /NH`
+        `tasklist /FI "IMAGENAME eq ${processName}.exe" /NH`,
       );
-      return stdout.includes(`${clientProcess}.exe`);
+      return stdout.includes(`${processName}.exe`);
     } else if (platform === "darwin") {
-      const { stdout } = await execAsync(`pgrep -x "${clientProcess}"`);
+      const { stdout } = await execAsync(`pgrep -x "${processName}"`);
       return !!stdout.trim();
     } else if (platform === "linux") {
       const { stdout } = await execAsync(
-        `pgrep -f "${clientProcess.toLowerCase()}"`
+        `pgrep -f "${processName.toLowerCase()}"`,
       );
       return !!stdout.trim();
     }
@@ -30,55 +29,51 @@ async function isClientRunning(client: string): Promise<boolean> {
   }
 }
 
-async function restartClient(client: string): Promise<void> {
-  const clientProcess = { claude: "Claude" }[client] || client;
+async function restartProcess(processName: string): Promise<void> {
   const platform = process.platform;
 
   try {
     if (platform === "win32") {
-      await execAsync(`taskkill /F /IM "${clientProcess}.exe"`);
+      await execAsync(`taskkill /F /IM "${processName}.exe"`);
     } else if (platform === "darwin") {
-      await execAsync(`killall "${clientProcess}"`);
+      await execAsync(`killall "${processName}"`);
     } else if (platform === "linux") {
-      await execAsync(`pkill -f "${clientProcess.toLowerCase()}"`);
+      await execAsync(`pkill -f "${processName.toLowerCase()}"`);
     }
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     if (platform === "win32") {
-      await execAsync(`start "" "${clientProcess}.exe"`);
+      await execAsync(`start "" "${processName}.exe"`);
     } else if (platform === "darwin") {
-      await execAsync(`open -a "${clientProcess}"`);
+      await execAsync(`open -a "${processName}"`);
     } else if (platform === "linux") {
-      await execAsync(clientProcess.toLowerCase());
+      await execAsync(processName.toLowerCase());
     }
 
-    console.log(chalk.green(`${clientProcess} has been restarted.`));
+    console.log(chalk.green(`${processName} has been restarted.`));
   } catch (error) {
-    console.error(chalk.red(`Failed to restart ${clientProcess}:`), error);
+    console.error(chalk.red(`Failed to restart ${processName}:`), error);
   }
 }
 
-export async function promptForRestart(client: string): Promise<void> {
-  // VS Code reloads mcp.json on change, and its process name differs per version.
-  if (client === "vscode") return;
-  // Antigravity hosts the terminal this CLI runs in; killing it kills the CLI too.
-  if (client === "antigravity") return;
-
-  const isRunning = await isClientRunning(client);
-  if (!isRunning) return;
+export async function promptForRestart(
+  displayName: string,
+  processName: string,
+): Promise<void> {
+  if (!(await isProcessRunning(processName))) return;
 
   const { shouldRestart } = await inquirer.prompt<{ shouldRestart: boolean }>([
     {
       type: "confirm",
       name: "shouldRestart",
-      message: `Would you like to restart ${chalk.bold(client)} now?`,
+      message: `Would you like to restart ${chalk.bold(displayName)} now?`,
       default: true,
     },
   ]);
 
   if (shouldRestart) {
-    console.log(`Restarting ${client} app...`);
-    await restartClient(client);
+    console.log(`Restarting ${displayName} app...`);
+    await restartProcess(processName);
   }
 }
