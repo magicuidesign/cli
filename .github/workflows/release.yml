@@ -22,14 +22,11 @@ jobs:
     steps:
       - uses: googleapis/release-please-action@v5
         id: release
-        with:
-          release-type: node
 
   publish:
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created == 'true' }}
     runs-on: ubuntu-latest
-    environment: npm
     permissions:
       contents: read
       id-token: write
