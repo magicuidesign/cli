@@ -92,7 +92,7 @@ const clients = {
     displayName: "VS Code",
     configPath: path.join(baseDir, "Code", "User", "mcp.json"),
     file: { kind: "json", rootKey: "servers" },
-    serverName: "magicui",
+    serverName: "magicuidesign",
     cmdOnWindows: false,
   },
   antigravity: {
