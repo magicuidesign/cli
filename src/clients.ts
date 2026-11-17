@@ -84,7 +84,8 @@ const clients = {
       "config.toml",
     ),
     file: { kind: "toml" },
-    serverName: "@magicuidesign/mcp",
+    // Codex only loads server names made of letters, digits, "-" and "_".
+    serverName: "magicuidesign",
     cmdOnWindows: true,
   },
   vscode: {
