@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/magicuidesign/cli/compare/v1.1.0...v1.1.1) (2026-11-17)
+
+
+### Bug Fixes
+
+* register the Codex and VS Code servers as magicuidesign ([#11](https://github.com/magicuidesign/cli/issues/11)) ([448002b](https://github.com/magicuidesign/cli/commit/448002bcebff969d21f429b69c672cc19de98b30))
+
 ## [1.1.0](https://github.com/magicuidesign/cli/compare/v1.0.3...v1.1.0) (2026-11-04)
 
 
